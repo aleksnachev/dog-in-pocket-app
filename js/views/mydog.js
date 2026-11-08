@@ -8,6 +8,7 @@ import { SIZE_CLASSES, adultSize } from '../../data/breeds.js';
 import { energyPlan, fmt } from '../calc.js';
 import { SOURCES } from '../../data/sources.js';
 import { CONFIG } from '../config.js';
+import { isStandalone } from '../install.js';
 
 function chart(list) {
   if (list.length < 2) return '';
@@ -64,7 +65,8 @@ export function myDogView(root) {
     <h3 class="section-title">Данни и настройки</h3>
     <button class="item" data-act="export"><span>${icon('download')}</span><span class="grow"><span class="t">Резервно копие</span><span class="s" style="display:block">Запазете файл – данните са само на това устройство</span></span></button>
     <label class="item" style="cursor:pointer"><span>${icon('upload')}</span><span class="grow"><span class="t">Възстанови от копие</span></span><input type="file" accept="application/json,.json" class="sr" data-act="import"></label>
-    <a class="item" href="#/settings"><span>${icon('sparkle')}</span><span class="grow"><span class="t">Настройки</span><span class="s" style="display:block">Тема, AI помощник</span></span>${icon('chevron', 'chev')}</a>
+    ${isStandalone() ? '' : `<a class="item" href="#/install"><span style="color:var(--brand)">${icon('download')}</span><span class="grow"><span class="t">Инсталирай на телефона</span><span class="s" style="display:block">Икона на началния екран, работи без интернет</span></span>${icon('chevron', 'chev')}</a>`}
+    <a class="item" href="#/settings"><span>${icon('sparkle')}</span><span class="grow"><span class="t">Настройки</span><span class="s" style="display:block">Светла или тъмна тема</span></span>${icon('chevron', 'chev')}</a>
     <a class="item" href="#/about"><span>${icon('info')}</span><span class="grow"><span class="t">За приложението и източниците</span></span>${icon('chevron', 'chev')}</a>
     <button class="item" data-act="delete" style="color:var(--danger)"><span>${icon('trash')}</span><span class="grow"><span class="t">Изтрий профила на ${esc(dog.name)}</span></span></button>
     ${disclaimer()}</div>
@@ -146,16 +148,10 @@ export function settingsView(root) {
   const theme = localStorage.getItem('theme') || 'auto';
   root.innerHTML = `${topbar('Настройки', { back: '#/me' })}<div class="view">
     <div class="card"><h2>Тема</h2><div class="chips">${[['auto', 'Автоматично'], ['light', 'Светла'], ['dark', 'Тъмна']].map(([k, l]) => `<button class="chip ${theme === k ? 'on' : ''}" data-theme="${k}">${l}</button>`).join('')}</div></div>
-    <div class="card"><h2>${icon('sparkle', 'sm')} AI помощник (по избор)</h2>
-      <p class="small muted">Локалното търсене работи винаги. AI помощникът (ако е включен в абонамента/покупката) обяснява по-подробно, но САМО от проверената база на приложението и изисква интернет.</p>
-      <label class="f" for="ai1">Адрес на AI сървъра</label><input id="ai1" type="url" value="${esc(s.aiEndpoint || CONFIG.aiEndpoint)}" placeholder="https://…">
-      <label class="f" for="ai2">Код за достъп</label><input id="ai2" type="text" value="${esc(s.accessCode || '')}" autocomplete="off">
-      <button class="btn accent" data-act="saveai" style="margin-top:10px">Запази</button></div>
     ${disclaimer()}</div>`;
   root.addEventListener('click', (e) => {
     const t = e.target.closest('[data-theme]');
     if (t) { const v = t.dataset.theme; if (v === 'auto') { localStorage.removeItem('theme'); delete document.documentElement.dataset.theme; } else { localStorage.setItem('theme', v); document.documentElement.dataset.theme = v; } rerender(); }
-    if (e.target.closest('[data-act="saveai"]')) { store.setSetting('aiEndpoint', $('#ai1', root).value.trim()); store.setSetting('accessCode', $('#ai2', root).value.trim()); toast('Запазено'); }
   });
 }
 
@@ -167,7 +163,7 @@ export function aboutView(root) {
     <p>Персонализиран дигитален помощник за хранене, ежедневни грижи, безопасност и профилактика на кучето. Версия ${CONFIG.appVersion}, съдържание от ${fmtDate(CONFIG.contentVersion)}.</p>
     <div class="box info small"><b>Как подбираме информацията:</b> използваме само ветеринарни и научни източници – FEDIAF (европейски хранителни стандарти), WSAVA (Световна асоциация на ветеринарните лекари за дребни животни), MSD/Merck Veterinary Manual, PDSA (британска ветеринарна благотворителна организация), ASPCA Animal Poison Control, ESCCAP (паразити), AKC (ветеринарно прегледани статии) и БАБХ. Всеки отговор показва своите източници.</div>
     <div class="box dont small"><b>Ограничения:</b> приложението не поставя диагнози, не препоръчва лекарства и дози и не замества ветеринарен преглед. Съдържанието се преглежда от ветеринарен лекар преди всяка версия.</div>
-    <h3>Поверителност</h3><p class="small">Профилът, теглото, бележките и календарът се пазят само на вашето устройство (localStorage). Ако използвате AI помощника, към сървъра се изпраща въпросът и обобщен профил без името на кучето.</p>
+    <h3>Поверителност</h3><p class="small">Профилът, теглото, бележките и календарът се пазят само на вашето устройство (localStorage).</p>
     <h3>Източници (${Object.keys(SOURCES).length})</h3>
     ${Object.entries(groups).map(([org, list]) => `<details class="sources"><summary>${esc(org)} (${list.length})</summary><ul>${list.map((s) => `<li><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a> · ${esc(s.checked)}</li>`).join('')}</ul></details>`).join('')}
     ${disclaimer()}</div>`;

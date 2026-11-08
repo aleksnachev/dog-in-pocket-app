@@ -7,6 +7,8 @@ import { foodView, foodItemView, recipeView } from './views/food.js';
 import { sosView, sosItemView, vetNoteView } from './views/sos.js';
 import { careView, articleView } from './views/care.js';
 import { myDogView, editView, settingsView, aboutView } from './views/mydog.js';
+import { installView } from './views/install.js';
+import { isStandalone, installDismissed } from './install.js';
 
 const theme = localStorage.getItem('theme');
 if (theme) document.documentElement.dataset.theme = theme;
@@ -40,10 +42,13 @@ function route() {
   view.id = 'view';
   const [a, b, c] = parts;
 
-  if (!hasDog && a !== 'onboarding') { location.replace('#/onboarding'); return; }
+  // Първо отваряне в браузъра: предлагаме инсталиране преди профила (на iPhone иконата има собствена памет)
+  if (!hasDog && !isStandalone() && !installDismissed() && a !== 'install') { location.replace('#/install'); return; }
+  if (!hasDog && a !== 'onboarding' && a !== 'install') { location.replace('#/onboarding'); return; }
 
   let tab = a;
-  if (a === 'onboarding') { renderNav(null, true); onboardingView(view, { addAnother: b === 'add' && hasDog }); }
+  if (a === 'install') { renderNav(null, !hasDog); installView(view); if (hasDog) renderNav('me', false); }
+  else if (a === 'onboarding') { renderNav(null, true); onboardingView(view, { addAnother: b === 'add' && hasDog }); }
   else if (a === 'food') {
     if (b === 'item') foodItemView(view, c);
     else if (b === 'recipe') recipeView(view, c);
@@ -61,7 +66,7 @@ function route() {
   else if (a === 'about') { tab = 'me'; aboutView(view); }
   else { tab = 'home'; homeView(view, params); }
 
-  if (a !== 'onboarding') renderNav(tab, false);
+  if (a !== 'onboarding' && a !== 'install') renderNav(tab, false);
   app.replaceChildren(view);
   if (!(a === 'home' && params.get('q'))) window.scrollTo(0, 0);
 }

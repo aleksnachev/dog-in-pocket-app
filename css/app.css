@@ -212,3 +212,6 @@ dialog .dlg { padding: 18px; max-height: 80vh; overflow: auto; }
 .empty { text-align: center; color: var(--ink-3); padding: 24px 8px; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 @media (min-width: 560px) { .view { padding: 16px 20px 28px; } }
+.sugg { margin-top: 8px; }
+.sugg:empty { display: none; }
+.sugg .item { box-shadow: none; margin: 6px 0; }

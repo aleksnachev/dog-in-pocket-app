@@ -1,0 +1,16 @@
+# Настройки за Apache хостинг (cPanel, SuperHosting, Хостинг.бг и др.). Други хостинги просто игнорират файла.
+<IfModule mod_mime.c>
+  AddType application/manifest+json .webmanifest
+  AddType text/javascript .js
+  AddCharset utf-8 .js .css .html .webmanifest
+</IfModule>
+<IfModule mod_headers.c>
+  # Частен продукт – да не се индексира и адресът да не изтича към външни сайтове
+  Header set X-Robots-Tag "noindex, nofollow, noarchive"
+  Header set Referrer-Policy "no-referrer"
+  # Service worker-ът винаги да е най-новият (за да получават купувачите обновленията)
+  <FilesMatch "^(sw\.js|index\.html|manifest\.webmanifest)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
+Options -Indexes
