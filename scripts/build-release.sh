@@ -5,7 +5,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 SLUG="${1:-$(cat RELEASE_SLUG)}"
 OUT="dist/$SLUG"
-rm -rf "dist" && mkdir -p "$OUT"
+rm -rf "$OUT" "dist/$SLUG.zip" && mkdir -p "$OUT"
 cp index.html manifest.webmanifest sw.js "$OUT/"
 cp -r css js data assets "$OUT/"
 cp hosting/htaccess "$OUT/.htaccess"
