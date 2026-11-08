@@ -1,0 +1,14 @@
+name = "kucheto-v-dzhoba-ai"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+DAILY_LIMIT = "30"
+ALLOWED_ORIGIN = "*"
+# MODEL = "claude-opus-5-5"   # по подразбиране; за по-ниска цена: "claude-haiku-5-5"
+
+# Дневен лимит по код (по избор):
+# [[kv_namespaces]]
+# binding = "USAGE"
+# id = "<KV namespace id>"

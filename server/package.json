@@ -1,0 +1,11 @@
+{
+  "name": "kucheto-v-dzhoba-ai",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.6.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4"
+  }
+}
