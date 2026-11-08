@@ -1,0 +1,17 @@
+{
+  "name": "Кучето в джоба",
+  "short_name": "Кучето в джоба",
+  "description": "Персонализиран дигитален помощник за хранене, ежедневни грижи, безопасност и профилактика на кучето.",
+  "lang": "bg",
+  "start_url": "./#/home",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fbf7f1",
+  "theme_color": "#d9682b",
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
