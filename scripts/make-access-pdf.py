@@ -12,7 +12,8 @@ import qrcode.image.svg
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 slug = open(os.path.join(ROOT, 'RELEASE_SLUG')).read().strip()
-URL = sys.argv[1] if len(sys.argv) > 1 else f'https://idezo.eu/{slug}/'
+base = open(os.path.join(ROOT, 'RELEASE_BASE')).read().strip().rstrip('/') if os.path.exists(os.path.join(ROOT, 'RELEASE_BASE')) else 'https://idezo.eu'
+URL = sys.argv[1] if len(sys.argv) > 1 else f'{base}/{slug}/'
 OUT_DIR = os.path.join(ROOT, 'dist')
 os.makedirs(OUT_DIR, exist_ok=True)
 
