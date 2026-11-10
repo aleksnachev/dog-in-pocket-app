@@ -7,6 +7,7 @@ import { avatar, emergencyCard, resultItem, disclaimer, sourcesList, vetCallBar 
 import { dogSummary, profileFlags, STAGE_LABEL, lifeStage } from '../profile.js';
 import { dailyTips, EVENT_TYPES } from '../../data/care.js';
 import { SOS } from '../../data/sos.js';
+import { isStandalone } from '../install.js';
 
 const QUICK = ['Може ли да яде банан?', 'Кучето повръща', 'Колко храна да давам?', 'Как да махна кърлеж?', 'Дърпа на повода', 'Страх от фойерверки'];
 
@@ -29,7 +30,7 @@ export function homeView(root, params) {
     const red = !r.triage.sos.length && r.triage.red ? `<div class="box red small">${icon('alert', 'sm')} Споменавате признак, който може да е сериозен (напр. кръв, колапс, постоянно повръщане). Ако е така – свържете се с ветеринар веднага.</div>` : '';
     const sec = (title, arr, n) => (arr.length ? `<h3 class="section-title">${title}</h3>${arr.slice(0, n).map((x) => resultItem(x, dog)).join('')}` : '');
     const none = !r.results.length ? `<div class="card flat"><b>Не намерих проверен отговор в базата.</b><p class="small muted" style="margin:6px 0 0">Опитайте с други думи (напр. „повръща“, „може ли ябълка“, „кърлеж“) или разгледайте SOS и Грижи. Ако се притеснявате – свържете се с ветеринар.</p></div>` : '';
-    const ai = aiEnabled() ? aiBlock() : '';
+    const ai = aiEnabled() ? aiBlock() : ''; // AI е изключен в тази версия (възможен Pro план)
     return `<div id="results">${emerg}${red}${sec('Първа помощ', groups.sos, 3)}${sec('Храни', groups.food, 4)}${sec('Грижи и съвети', groups.article, 3)}${sec('Рецепти', groups.recipe, 3)}${none}${ai}</div>`;
   }
 
@@ -76,6 +77,19 @@ export function homeView(root, params) {
     }).join('')}`;
   }
 
+  function installHTML() {
+    if (isStandalone() || sessionStorage.getItem('kvd-hide-install')) return '';
+    return `<div class="card flat row" style="gap:12px"><span style="color:var(--brand)">${icon('download')}</span><a class="grow" href="#/install" style="text-decoration:none;color:inherit"><b>Инсталирай на телефона</b><span class="small muted" style="display:block">Отваря се с една икона и работи без интернет</span></a><button class="iconbtn" data-act="hideinstall" aria-label="Скрий">${icon('x', 'sm')}</button></div>`;
+  }
+
+  // Подсказки, докато пишете (без AI – търсят в проверената база)
+  function suggestHTML(q) {
+    if (!q || q.trim().length < 2) return '';
+    const r = search(q, dog, 6).results;
+    if (!r.length) return '';
+    return r.map((x) => resultItem(x, dog)).join('');
+  }
+
   function render() {
     const hist = store.get().history;
     root.innerHTML = `${header()}<div class="view">
@@ -83,10 +97,11 @@ export function homeView(root, params) {
         <h2>Какво искаш да попиташ?</h2>
         <p>Пиши със свои думи – отговорите са съобразени с ${esc(dog.name)} (${esc(STAGE_LABEL[lifeStage(dog)])}).</p>
         <form class="askbox" data-act="ask"><label class="sr" for="q">Въпрос</label><input id="q" type="search" enterkeyhint="search" placeholder="напр. Може ли да яде ябълка?" value="${esc(st.q)}" autocomplete="off"><button type="submit" aria-label="Търси">${icon('search')}</button></form>
-        ${st.q ? '' : `<div class="chips">${(hist.length ? hist.slice(0, 3) : []).concat(QUICK).slice(0, 6).map((q) => `<button class="chip" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>`}
+        <div id="sugg" class="sugg"></div>
+        ${st.q ? '' : `<div class="chips" id="qchips">${(hist.length ? hist.slice(0, 3) : []).concat(QUICK).slice(0, 6).map((q) => `<button class="chip" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>`}
       </section>
       ${resultsHTML()}
-      ${st.q ? `<button class="btn ghost block" data-act="clear" style="margin-top:8px">Нов въпрос</button>` : `${personalHTML()}${tipsHTML()}${upcomingHTML()}`}
+      ${st.q ? `<button class="btn ghost block" data-act="clear" style="margin-top:8px">Нов въпрос</button>` : `${installHTML()}${personalHTML()}${tipsHTML()}${upcomingHTML()}`}
       ${disclaimer()}
     </div>`;
   }
@@ -100,6 +115,8 @@ export function homeView(root, params) {
   };
 
   root.addEventListener('submit', (e) => { e.preventDefault(); runSearch($('#q', root).value); });
+  const suggest = debounce(() => { const el = $('#sugg', root); const i = $('#q', root); if (el && i) el.innerHTML = i.value === st.q ? '' : suggestHTML(i.value); const c = $('#qchips', root); if (c) c.hidden = i.value.trim().length >= 2; }, 180);
+  root.addEventListener('input', (e) => { if (e.target.id === 'q') suggest(); });
   root.addEventListener('click', async (e) => {
     const chip = e.target.closest('[data-q]');
     if (chip) { runSearch(chip.dataset.q); return; }
@@ -107,6 +124,7 @@ export function homeView(root, params) {
     if (tip) { store.toggleCheck(dog.id, tip.dataset.tip); render(); return; }
     const act = e.target.closest('[data-act]')?.dataset.act;
     if (act === 'clear') { runSearch(''); $('#q', root)?.focus(); }
+    if (act === 'hideinstall') { sessionStorage.setItem('kvd-hide-install', '1'); render(); }
     if (act === 'ai') {
       st.aiLoading = true; render();
       try { const r = search(st.q, dog); st.ai = await askAI(st.q, dog, r.results); }

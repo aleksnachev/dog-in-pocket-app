@@ -39,7 +39,7 @@ export function phraseScore(phraseTokens, qTokens) {
   let total = 0;
   for (const p of phraseTokens) {
     let best = 0;
-    for (const q of qTokens) best = Math.max(best, wordMatch(p, q));
+    for (const q of qTokens) best = Math.max(best, wordMatch(p, q), q.length >= 3 && p.startsWith(q) ? 1 : 0); // начало на дума – за подсказки докато пишете
     if (!best) return 0; // всички думи от фразата трябва да присъстват
     total += best;
   }

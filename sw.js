@@ -1,5 +1,5 @@
 // Service worker – офлайн работа. При промяна на файловете увеличете VERSION.
-const VERSION = 'kvd-0.1.0';
+const VERSION = 'kvd-0.2.0';
 const ASSETS = [
   './',
   './index.html',
@@ -22,6 +22,8 @@ const ASSETS = [
   './js/engine/triage.js',
   './js/engine/search.js',
   './js/engine/ai.js',
+  './js/install.js',
+  './js/views/install.js',
   './js/views/onboarding.js',
   './js/views/profileForm.js',
   './js/views/home.js',

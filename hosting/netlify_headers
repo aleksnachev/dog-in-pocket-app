@@ -1,0 +1,13 @@
+/*
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Referrer-Policy: no-referrer
+  X-Content-Type-Options: nosniff
+/__SLUG__/sw.js
+  Cache-Control: no-cache
+/__SLUG__/index.html
+  Cache-Control: no-cache
+/__SLUG__/
+  Cache-Control: no-cache
+/__SLUG__/manifest.webmanifest
+  Content-Type: application/manifest+json
+  Cache-Control: no-cache

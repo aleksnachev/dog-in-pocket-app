@@ -1,0 +1,9 @@
+# Netlify: при всяко качване в GitHub сглобява само тайната папка на приложението.
+# Публикува се dist/netlify-site (тайната папка + _headers, _redirects, robots.txt),
+# а НЕ корена на репото (там са и server/, docs/, tests/).
+[build]
+  command = "bash scripts/build-release.sh"
+  publish = "dist/netlify-site"
+
+[build.environment]
+  NO_ZIP = "1"
